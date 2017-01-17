@@ -7,7 +7,7 @@ import mpi.MPI;
 import mpi.Request;
 
 public class Parallel {
-	//Comment
+
 	static boolean random = false;
 	static int mode = 2;
 	static int numberOfPancakes = 17;
