@@ -7,7 +7,7 @@ public class Sequentiell {
 	static int numberOfPancakes = 17;
 	static boolean random = false;
 	static int mode = 1;
-	
+	//Comment
 	public static void main(String[] args) {
 		int rank, size;
 		MPI.Init(args);
