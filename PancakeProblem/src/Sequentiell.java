@@ -10,7 +10,7 @@ import mpi.MPI;
  */
 public class Sequentiell {
 	//Anzahl pancakes des Stacks. Der Teller wird nicht in die Anzahl einberechnet
-	static int numberOfPancakes = 17;
+	static int numberOfPancakes = 16;
 	//Bei true wird eine zufällige Startkonfiguration gewählt. bei false werden die pancakes paarweise vertauscht
 	static boolean random = false;
 	//Bei 1 wird die erste optimale Lösung ausgegeben. Bei 2 werden alle optimalen Lösungen gezählt

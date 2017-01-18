@@ -11,15 +11,15 @@ public class MainStackElement implements Serializable  {
 
 	private static final long serialVersionUID = 1L;
 	private Node node;
-	private List<Node> localStack;
+	private List<Integer> localStack;
 	
 	public MainStackElement(Node root){
-		localStack = new ArrayList<Node>();
+		localStack = new ArrayList<Integer>();
 		node = root;
 	}
 	
-	public void push(Node node){
-		localStack.add(node);
+	public void push(Integer flip){
+		localStack.add(flip);
 	}
 	
 
@@ -27,9 +27,10 @@ public class MainStackElement implements Serializable  {
 		if( isEmpty()){
 			return null;
 		}
-		Node node = localStack.get(localStack.size() - 1);
+		int flip = localStack.get(localStack.size() - 1);
 		localStack.remove(localStack.size() - 1);
-		return node;
+		
+		return node.flip(flip);
 	}
 	
 	public boolean isEmpty(){
@@ -45,9 +46,9 @@ public class MainStackElement implements Serializable  {
 	 * expands the current node and adds the child nodes to the localstack
 	 */
 	public void expand(){
-		List<Node> children = node.getAllChildNodes();
-		for (Node child : children){
-			localStack.add(child);
+		List<Integer> children = node.getAllChildNodes();
+		for (int flip : children){
+			localStack.add(flip);
 		}
 		
 	}
@@ -67,14 +68,14 @@ public class MainStackElement implements Serializable  {
 		//makes a copy of itself
 		MainStackElement splitElement = new MainStackElement(node);
 		//distributes remaining child nodes among itself and the copy
-		List<Node> remainingList = new ArrayList<Node>();
+		List<Integer> remainingList = new ArrayList<Integer>();
 		int i = 0;
-		for (Node node : localStack){
+		for (int flip : localStack){
 			if(i % 2 == 0){
-				splitElement.push(node);
+				splitElement.push(flip);
 			}
 			else{
-				remainingList.add(node);
+				remainingList.add(flip);
 			}
 			i++;
 		}

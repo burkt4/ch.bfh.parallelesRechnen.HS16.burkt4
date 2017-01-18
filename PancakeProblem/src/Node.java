@@ -87,14 +87,14 @@ public class Node implements Serializable  {
 	 * Generate a list of all child nodes that have a chance to lead to an optimal solution
 	 * @return
 	 */
-	public List<Node> getAllChildNodes(){
-		List<Node> children = new ArrayList<Node>();
+	public List<Integer> getAllChildNodes(){
+		List<Integer> children = new ArrayList<Integer>();
 		
 		//fliping the top most pancake is  ignored, since it does not change the order of the pancakes
 		for(int i = 1; i < pancakes.size(); i++ ){
 			//reversing the last flip is ignored
 			if ( !(previousFlip == i)){
-				children.add(this.flip(i));
+				children.add(i);
 			}			
 		}
 		

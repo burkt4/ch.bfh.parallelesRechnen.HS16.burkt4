@@ -14,7 +14,7 @@ import mpi.Request;
 public class Parallel {
 
 	//Anzahl pancakes des Stacks. Der Teller wird nicht in die Anzahl einberechnet
-	static int numberOfPancakes = 17;
+	static int numberOfPancakes = 16;
 	//Bei true wird eine zufällige Startkonfiguration gewählt. bei false werden die pancakes paarweise vertauscht
 	static boolean random = false;
 	//Bei 1 wird die erste optimale Lösung ausgegeben. Bei 2 werden alle optimalen Lösungen gezählt
@@ -37,13 +37,11 @@ public class Parallel {
 		
 			if (rank == PROC_MAIN){
 				runMasterProcessMode1();
-
-				System.out.println("Finished:" + rank);
+				//System.out.println("Finished:" + rank);
 			}
 			else{
 				runWorkerProcess();
-
-				System.out.println("Finished:" + rank);
+				//System.out.println("Finished:" + rank);
 			}
 		
 		MPI.Finalize();  
