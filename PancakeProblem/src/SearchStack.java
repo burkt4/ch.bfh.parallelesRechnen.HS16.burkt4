@@ -2,11 +2,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class represents the SearchTree for the pancake problem
+ * @author t.buerk
+ *
+ */
 public class SearchStack implements Serializable {
-	//Comment
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	List<MainStackElement> mainSearchStack;
 	private int minimumDistanceToSolution;
@@ -53,7 +55,7 @@ public class SearchStack implements Serializable {
 		MainStackElement topMainElement =  mainSearchStack.get(mainSearchStack.size() -1);
 	
 		return topMainElement;
-}
+	}
 	
 	public boolean isEmpty(){
 		if (mainSearchStack.size() == 0){
@@ -65,7 +67,10 @@ public class SearchStack implements Serializable {
 	}
 	
 
-	
+	/**
+	 * gets the current Path of the main stack as a List of Nodes
+	 * @return
+	 */
 	public List<Node> getPath(){
 		ArrayList<Node> mainPathList = new ArrayList<Node>();
 		for (MainStackElement element : mainSearchStack){
@@ -98,9 +103,13 @@ public class SearchStack implements Serializable {
 		this.isSolution = isSolution;
 	}
 	
+	/**
+	 * Splits the SearchStack an returns one half of the Stack as a new SearchStack
+	 * @return
+	 */
 	public SearchStack split(){
 		SearchStack splitStack = new SearchStack(minimumDistanceToSolution, bound);
-		
+		//split each MainElement and add split off MainElement to the splitStack
 		for (MainStackElement element : mainSearchStack){
 			splitStack.push(element.split());
 		}

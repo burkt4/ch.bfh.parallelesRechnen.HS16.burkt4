@@ -2,6 +2,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class represents a stack of pancakes
+ * @author t.buerk
+ *
+ */
 public class Node implements Serializable  {
 	//Comment
 	private List<Integer> pancakes;
@@ -14,7 +19,10 @@ public class Node implements Serializable  {
 		this.numberOfMovesDone = numberOfMovesDone;
 		this.previousFlip = previousFlip;
 	}
-	
+	/**
+	 * Get the optimistic distance to the solution with gap heuristic
+	 * @return
+	 */
 	public int getOptimisticDistanceToSolution(){
 		int distance = 0;
 		
@@ -53,6 +61,11 @@ public class Node implements Serializable  {
 		
 	}
 	
+	/**
+	 * Preforms the flip operation on the current stack of pancake at the given position
+	 * @param position
+	 * @return
+	 */
 	public Node flip(int position){
 		List<Integer> newStack = new ArrayList<Integer>();
 		
@@ -70,10 +83,16 @@ public class Node implements Serializable  {
 		return newNode;
 	}
 	
+	/**
+	 * Generate a list of all child nodes that have a chance to lead to an optimal solution
+	 * @return
+	 */
 	public List<Node> getAllChildNodes(){
 		List<Node> children = new ArrayList<Node>();
 		
+		//fliping the top most pancake is  ignored, since it does not change the order of the pancakes
 		for(int i = 1; i < pancakes.size(); i++ ){
+			//reversing the last flip is ignored
 			if ( !(previousFlip == i)){
 				children.add(this.flip(i));
 			}			
@@ -87,6 +106,10 @@ public class Node implements Serializable  {
 		return numberOfMovesDone;
 	}
 	
+	/**
+	 * Returns whether the current order of pancakes is a solution
+	 * @return
+	 */
 	public boolean isSolution(){
 		if (this.getOptimisticDistanceToSolution() == 0){
 			return true;

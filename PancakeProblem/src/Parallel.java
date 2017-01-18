@@ -8,9 +8,12 @@ import mpi.Request;
 
 public class Parallel {
 
-	static boolean random = false;
-	static int mode = 2;
+	//Anzahl pancakes des Stacks. Der Teller wird nicht in die Anzahl einberechnet
 	static int numberOfPancakes = 17;
+	//Bei true wird eine zufällige Startkonfiguration gewählt. bei false werden die pancakes paarweise vertauscht
+	static boolean random = false;
+	//Bei 1 wird die erste optimale Lösung ausgegeben. Bei 2 werden alle optimalen Lösungen gezählt
+	static int mode = 2;
 	
 	static final int PROC_MAIN = 0;
 	static final int RESULT = 101;
@@ -45,7 +48,6 @@ public class Parallel {
 		int size = MPI.COMM_WORLD.Size();
 		
 		//prepare initial Stack
-		
 		List<Integer> list = new ArrayList<Integer>();
 		if (random){
 			for (int i = 0; i < numberOfPancakes;i++){
@@ -83,7 +85,7 @@ public class Parallel {
 
 		Node root = new Node(list, 0, -1);
 		
-		System.out.println("Start:");
+		System.out.println("Start Parallel:");
 		System.out.println(root.toString());
 		System.out.println("Optimistic Distance To Solution: " + root.getOptimisticDistanceToSolution());
 			
@@ -159,7 +161,7 @@ public class Parallel {
 			
 			isWorking = new boolean[size];
 			requestpending  = new boolean[size];
-			//send work
+			//send work to process 1 to start the new run
 			outBuffer[0] = stack;
 			MPI.COMM_WORLD.Isend(outBuffer, 0, outBuffer.length, MPI.OBJECT, 1, NEEDWORK);
 			//System.out.println("Sent work to " + 1);
@@ -169,7 +171,7 @@ public class Parallel {
 			while (somebodyIsWorking){
 				
 
-				
+				//check for results
 				for (int i = 1 ; i <= size - 1; i++){
 					
 					if (resultRequests[i].Test() != null){
@@ -201,6 +203,7 @@ public class Parallel {
 					break;
 				}
 
+				//make a list of idle worker processes
 				List<Integer> needsWork = new LinkedList<Integer>();
 				for (int i = 1 ; i <= size - 1; i++){
 					if (!isWorking[i]){
@@ -252,7 +255,7 @@ public class Parallel {
 						}
 					}
 				}
-				
+				//check if there are still working worker processes
 				somebodyIsWorking = false;
 				for (int i = 1 ; i <= size - 1; i++){
 					if (isWorking[i]){
@@ -315,7 +318,7 @@ public class Parallel {
 			while (somebodyIsWorking){
 				
 
-				
+				//check for results
 				for (int i = 1 ; i <= size - 1; i++){
 					
 					if (resultRequests[i].Test() != null){
@@ -342,7 +345,8 @@ public class Parallel {
 						
 					}
 				}
-
+				
+				//generate list of all idle processes
 				List<Integer> needsWork = new LinkedList<Integer>();
 				for (int i = 1 ; i <= size - 1; i++){
 					if (!isWorking[i]){
@@ -395,6 +399,7 @@ public class Parallel {
 					}
 				}
 				
+				//check if there are still working worker processes
 				somebodyIsWorking = false;
 				for (int i = 1 ; i <= size - 1; i++){
 					if (isWorking[i]){
@@ -424,8 +429,9 @@ public class Parallel {
 	Request checkInRequest = MPI.COMM_WORLD.Irecv(checkInInBuffer, 0, inBuffer.length, MPI.INT, PROC_MAIN, CHECKIN);
 	
 	while (!abort){
-		//System.out.println(rank + " looking for work");
 		
+		//waits to recieve work from master process
+		//System.out.println(rank + " looking for work");
 		Request needWorkRequest = MPI.COMM_WORLD.Irecv(inBuffer, 0, inBuffer.length, MPI.OBJECT, PROC_MAIN, NEEDWORK);
 		SearchStack workStack = null;
 		
@@ -434,6 +440,7 @@ public class Parallel {
 				workStack = (SearchStack) inBuffer[0];
 			}
 			else if (checkInRequest.Test() != null){
+				//aborts the search when solution has been found
 				checkInRequest = MPI.COMM_WORLD.Irecv(checkInInBuffer, 0, checkInInBuffer.length, MPI.INT, PROC_MAIN, CHECKIN);
 				int result;
 				
@@ -463,8 +470,9 @@ public class Parallel {
 		
 		
 		while(!workStack.isEmpty()){
-				workStack = search(workStack, workStack.getBound(), 5000);
-				
+			workStack = search(workStack, workStack.getBound(), 5000);
+			
+			//check if a solution has been found
 			if (workStack.isSolution()) {
 				//System.out.println("sending result, result is empty:" + workStack.isEmpty());
 				outBuffer[0] = workStack;
@@ -473,20 +481,21 @@ public class Parallel {
 				workStack.pop();
 			}
 			
+			//Checks in with master process to see if it needs to split the stack or quits the search
 			//System.out.println(rank + " checking in with master Process:");
-
 			if (checkInRequest.Test() != null){
 				checkInRequest = MPI.COMM_WORLD.Irecv(checkInInBuffer, 0, checkInInBuffer.length, MPI.INT, PROC_MAIN, CHECKIN);
 				int result;
 				
 				result = checkInInBuffer[0];
 				if (result == 1){
+					//aborts the search when solution has been found
 					abort = true;
 					break;
 				}
 				else if(result == 0){
+					//Splits its workstack and send the result to master process
 					//System.out.println(rank + " splitting the stack");
-					//split 
 					outBuffer[0] = workStack.split();
 					MPI.COMM_WORLD.Isend(outBuffer, 0, outBuffer.length, MPI.OBJECT, PROC_MAIN, GETWORK);
 				}
@@ -495,6 +504,7 @@ public class Parallel {
 
 		}
 		
+		//sends empty stack to master process to show its out of work 
 		if (workStack.isEmpty()) {
 			//System.out.println("sending result, result is empty:" + workStack.isEmpty());
 			outBuffer[0] = workStack;
@@ -528,6 +538,7 @@ public class Parallel {
 					}
 				}
 				else{
+					//takes a break from the search to check in with master process
 					currentMainStackElement = new MainStackElement(currentNode);
 					currentMainStackElement.expand();
 					stack.push(currentMainStackElement);

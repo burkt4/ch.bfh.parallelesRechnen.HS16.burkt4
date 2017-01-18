@@ -2,11 +2,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class represents a main stack element 
+ * @author t.buerk
+ *
+ */
 public class MainStackElement implements Serializable  {
-	//Comment
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	private Node node;
 	private List<Node> localStack;
@@ -20,6 +22,7 @@ public class MainStackElement implements Serializable  {
 		localStack.add(node);
 	}
 	
+
 	public Node pop(){
 		if( isEmpty()){
 			return null;
@@ -38,6 +41,9 @@ public class MainStackElement implements Serializable  {
 		}
 	}
 	
+	/**
+	 * expands the current node and adds the child nodes to the localstack
+	 */
 	public void expand(){
 		List<Node> children = node.getAllChildNodes();
 		for (Node child : children){
@@ -52,8 +58,15 @@ public class MainStackElement implements Serializable  {
 		return node;
 	}
 
+	/**
+	 * The MainElement creates a copy of itself and distributes the elements in the local stack among itself 
+	 * and the copy and then returns the copy
+	 * @return
+	 */
 	public MainStackElement split() {
+		//makes a copy of itself
 		MainStackElement splitElement = new MainStackElement(node);
+		//distributes remaining child nodes among itself and the copy
 		List<Node> remainingList = new ArrayList<Node>();
 		int i = 0;
 		for (Node node : localStack){
