@@ -69,7 +69,7 @@ public class Node implements Serializable  {
 	public List<Node> getAllChildNodes(){
 		List<Node> children = new ArrayList<Node>();
 		
-		for(int i = 0; i < pancakes.size(); i++ ){
+		for(int i = 1; i < pancakes.size(); i++ ){
 			children.add(this.flip(i));
 		}
 		

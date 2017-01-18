@@ -9,7 +9,7 @@ import mpi.Request;
 public class Parallel {
 
 	static boolean random = false;
-	static int mode = 2;
+	static int mode = 1;
 	static int numberOfPancakes = 17;
 	
 	static final int PROC_MAIN = 0;
@@ -33,7 +33,7 @@ public class Parallel {
 				System.out.println("Finished:" + rank);
 			}
 			else{
-				runWorkerProcessMode1();
+				runWorkerProcess();
 
 				System.out.println("Finished:" + rank);
 			}
@@ -162,7 +162,7 @@ public class Parallel {
 			//send work
 			outBuffer[0] = stack;
 			MPI.COMM_WORLD.Isend(outBuffer, 0, outBuffer.length, MPI.OBJECT, 1, NEEDWORK);
-			System.out.println("Sent work to " + 1);
+			//System.out.println("Sent work to " + 1);
 			isWorking[1] = true;
 			boolean somebodyIsWorking = true;
 			
@@ -175,10 +175,10 @@ public class Parallel {
 					if (resultRequests[i].Test() != null){
 						resultRequests[i] = MPI.COMM_WORLD.Irecv(inBuffer, 0, inBuffer.length, MPI.OBJECT, i, RESULT);
 						SearchStack responseStack = (SearchStack) inBuffer[0];
-						System.out.println("Recieved result from " + i);
+						//System.out.println("Recieved result from " + i);
 
 						if (responseStack.isSolution()) {
-							System.out.println("ResultSolution " + i);
+							//System.out.println("ResultSolution " + i);
 							solutionStack = responseStack;
 							break;
 						}
@@ -201,52 +201,54 @@ public class Parallel {
 					break;
 				}
 
-				Queue<Integer> needsWork = new LinkedList<Integer>();
+				List<Integer> needsWork = new LinkedList<Integer>();
 				for (int i = 1 ; i <= size - 1; i++){
 					if (!isWorking[i]){
 						needsWork.add(i);
 					}
 				}
 					
-				
-			//send requests for work
-			if (!needsWork.isEmpty()){
-				int numberOfRequestsSent = 0;
-				
-				for (int i = 1 ; i <= size - 1; i++){
-					if (isWorking[i] &&  !requestpending[i]){
-						int checkInOutBuffer[] = new int[1];
-						checkInOutBuffer[0] = 0;
-						System.out.println("Request work from " + i);
-						MPI.COMM_WORLD.Isend(checkInOutBuffer, 0, checkInOutBuffer.length, MPI.INT, i, CHECKIN);
-						requestpending[i] = true;
-						numberOfRequestsSent++;
-						if (numberOfRequestsSent >= needsWork.size()){
-							break;
+				//send requests for work
+				if (!needsWork.isEmpty()){
+					int numberOfRequestsSent = 0;
+					
+					for (int i = 1 ; i <= size - 1; i++){
+						if (isWorking[i] &&  !requestpending[i]){
+							int checkInOutBuffer[] = new int[1];
+							checkInOutBuffer[0] = 0;
+							//System.out.println("Request work from " + i);
+							MPI.COMM_WORLD.Isend(checkInOutBuffer, 0, checkInOutBuffer.length, MPI.INT, i, CHECKIN);
+							requestpending[i] = true;
+							numberOfRequestsSent++;
+							if (numberOfRequestsSent >= needsWork.size()){
+								break;
+							}
 						}
-					}
-					else if(requestpending[i]){
-						numberOfRequestsSent++;
-						if (numberOfRequestsSent >= needsWork.size()){
-							break;
+						else if(requestpending[i]){
+							numberOfRequestsSent++;
+							if (numberOfRequestsSent >= needsWork.size()){
+								break;
+							}
 						}
-					}
-			
-				}	
+				
+					}	
 
-			}
+				}
 				
 				//check if work arrived
+				int startingpoint = 1;
 				for (int recvID : needsWork){				
 					//System.out.println("Now checking for splitstack");
-					for (int i = 1 ; i <= size - 1; i++){
+					for (int i = startingpoint ; i <= size - 1; i++){
 						if (getWorkRequests[i].Test() != null){							
 							outBuffer[0]  = (SearchStack) inBuffer[0];
 							getWorkRequests[i] = MPI.COMM_WORLD.Irecv(inBuffer, 0, inBuffer.length, MPI.OBJECT, i, GETWORK);
 							requestpending[i] = false;
-							System.out.println("Sent work to " + recvID);
+							//System.out.println("Sent work to " + recvID);
 							MPI.COMM_WORLD.Isend(outBuffer, 0, outBuffer.length, MPI.OBJECT, recvID, NEEDWORK);
-							isWorking[recvID] = true;	
+							isWorking[recvID] = true;
+							startingpoint = i + 1;
+							break;
 						}
 					}
 				}
@@ -275,7 +277,6 @@ public class Parallel {
 	
 	public static int solveMode2(Node root){
 		int size = MPI.COMM_WORLD.Size();
-		SearchStack solutionStack = null;
 		int bound =  root.getOptimisticDistanceToSolution();
 		int maxBound = bound * 10;
 		int numberOfSolutions = 0;
@@ -288,6 +289,7 @@ public class Parallel {
 		for (int i = 1 ; i <= size - 1; i++){
 			resultRequests[i] = MPI.COMM_WORLD.Irecv(inBuffer, 0, inBuffer.length, MPI.OBJECT, i, RESULT);				
 		}
+		
 		for (int i = 1 ; i <= size - 1; i++){
 			getWorkRequests[i] = MPI.COMM_WORLD.Irecv(inBuffer, 0, inBuffer.length, MPI.OBJECT, i, GETWORK);				
 		}
@@ -298,7 +300,6 @@ public class Parallel {
 
 			int nextbound = Integer.MAX_VALUE;
 			SearchStack stack = new SearchStack(root, bound);
-
 			
 			System.out.println("Started new with run with bound: " + bound);
 			
@@ -320,12 +321,12 @@ public class Parallel {
 					if (resultRequests[i].Test() != null){
 						resultRequests[i] = MPI.COMM_WORLD.Irecv(inBuffer, 0, inBuffer.length, MPI.OBJECT, i, RESULT);
 						SearchStack responseStack = (SearchStack) inBuffer[0];
-						System.out.println("Recieved result from " + i);
+						//System.out.println("Recieved result from " + i);
 
 						if (responseStack.isSolution()) {
 							
 							numberOfSolutions++;
-							System.out.println("Current Total of Solutions: " + numberOfSolutions);
+							//System.out.println("Current Total of Solutions: " + numberOfSolutions);
 						}
 						else{
 							
@@ -341,12 +342,8 @@ public class Parallel {
 						
 					}
 				}
-				
-				if (solutionStack != null){
-					break;
-				}
 
-				Queue<Integer> needsWork = new LinkedList<Integer>();
+				List<Integer> needsWork = new LinkedList<Integer>();
 				for (int i = 1 ; i <= size - 1; i++){
 					if (!isWorking[i]){
 						needsWork.add(i);
@@ -361,7 +358,7 @@ public class Parallel {
 						if (isWorking[i] &&  !requestpending[i]){
 							int checkInOutBuffer[] = new int[1];
 							checkInOutBuffer[0] = 0;
-							System.out.println("Request work from " + i);
+							//System.out.println("Request work from " + i);
 							MPI.COMM_WORLD.Isend(checkInOutBuffer, 0, checkInOutBuffer.length, MPI.INT, i, CHECKIN);
 							requestpending[i] = true;
 							numberOfRequestsSent++;
@@ -381,16 +378,19 @@ public class Parallel {
 				}
 				
 				//check if work arrived
+				int startingpoint = 1;
 				for (int recvID : needsWork){				
 					//System.out.println("Now checking for splitstack");
-					for (int i = 1 ; i <= size - 1; i++){
+					for (int i = startingpoint ; i <= size - 1; i++){
 						if (getWorkRequests[i].Test() != null){							
 							outBuffer[0]  = (SearchStack) inBuffer[0];
 							getWorkRequests[i] = MPI.COMM_WORLD.Irecv(inBuffer, 0, inBuffer.length, MPI.OBJECT, i, GETWORK);
 							requestpending[i] = false;
-							System.out.println("Sent work to " + recvID);
+							//System.out.println("Sent work to " + recvID);
 							MPI.COMM_WORLD.Isend(outBuffer, 0, outBuffer.length, MPI.OBJECT, recvID, NEEDWORK);
-							isWorking[recvID] = true;	
+							isWorking[recvID] = true;
+							startingpoint = i + 1;
+							break;
 						}
 					}
 				}
@@ -417,14 +417,14 @@ public class Parallel {
 		return numberOfSolutions;
 	}
 	
-	private static void runWorkerProcessMode1(){
+	private static void runWorkerProcess(){
 	int	rank = MPI.COMM_WORLD.Rank();	
 	boolean abort = false;
 	int checkInInBuffer[] = new int[1];
 	Request checkInRequest = MPI.COMM_WORLD.Irecv(checkInInBuffer, 0, inBuffer.length, MPI.INT, PROC_MAIN, CHECKIN);
 	
 	while (!abort){
-		System.out.println(rank + " looking for work");
+		//System.out.println(rank + " looking for work");
 		
 		Request needWorkRequest = MPI.COMM_WORLD.Irecv(inBuffer, 0, inBuffer.length, MPI.OBJECT, PROC_MAIN, NEEDWORK);
 		SearchStack workStack = null;
@@ -485,7 +485,7 @@ public class Parallel {
 					break;
 				}
 				else if(result == 0){
-					System.out.println(rank + " splitting the stack");
+					//System.out.println(rank + " splitting the stack");
 					//split 
 					outBuffer[0] = workStack.split();
 					MPI.COMM_WORLD.Isend(outBuffer, 0, outBuffer.length, MPI.OBJECT, PROC_MAIN, GETWORK);
