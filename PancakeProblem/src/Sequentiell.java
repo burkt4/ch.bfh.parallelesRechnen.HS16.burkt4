@@ -3,6 +3,11 @@ import java.util.List;
 
 import mpi.MPI;
 
+/**
+ * solves pancake problem sequentially. needs 1 Master process
+ * @author t.buerk
+ *
+ */
 public class Sequentiell {
 	//Anzahl pancakes des Stacks. Der Teller wird nicht in die Anzahl einberechnet
 	static int numberOfPancakes = 17;

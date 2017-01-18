@@ -6,6 +6,11 @@ import java.util.Queue;
 import mpi.MPI;
 import mpi.Request;
 
+/**
+ * solves pancake problem with parallel processing. needs 1 Master process and at least 1 worker process
+ * @author t.buerk
+ *
+ */
 public class Parallel {
 
 	//Anzahl pancakes des Stacks. Der Teller wird nicht in die Anzahl einberechnet
