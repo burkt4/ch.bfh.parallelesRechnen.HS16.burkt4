@@ -49,7 +49,7 @@ public class Sequentiell {
 				}
 
 			}
-			Node root = new Node(list, 0);
+			Node root = new Node(list, 0, -1);
 			
 			System.out.println("Start:");
 			System.out.println(root.toString());

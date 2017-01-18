@@ -6,12 +6,13 @@ public class Node implements Serializable  {
 	//Comment
 	private List<Integer> pancakes;
 	private int numberOfMovesDone;
+	private int previousFlip;
 	
-	public Node(List<Integer> pancakes, int numberOfMovesDone){
+	public Node(List<Integer> pancakes, int numberOfMovesDone, int previousFlip){
 		
 		this.pancakes = pancakes;
 		this.numberOfMovesDone = numberOfMovesDone;
-		
+		this.previousFlip = previousFlip;
 	}
 	
 	public int getOptimisticDistanceToSolution(){
@@ -37,12 +38,15 @@ public class Node implements Serializable  {
 		
 		String output = "";
 		
-		for (int pancake : pancakes){
+		for (int i = 0; i < pancakes.size() ; i++){
 			if(output == ""){
-				output = "Stack: " + pancake;
+				output = "Stack: " + pancakes.get(i);
 			}
 			else{
-				output += 	", " + pancake;
+				output += 	" " + pancakes.get(i);
+			}
+			if(i == previousFlip){
+				output += 	" |" ;
 			}
 		}
 		return output;
@@ -62,7 +66,7 @@ public class Node implements Serializable  {
 			newStack.add(pancakes.get(i));
 		}
 		
-		Node newNode = new Node(newStack, numberOfMovesDone + 1);
+		Node newNode = new Node(newStack, numberOfMovesDone + 1, position);
 		return newNode;
 	}
 	
@@ -70,7 +74,9 @@ public class Node implements Serializable  {
 		List<Node> children = new ArrayList<Node>();
 		
 		for(int i = 1; i < pancakes.size(); i++ ){
-			children.add(this.flip(i));
+			if ( !(previousFlip == i)){
+				children.add(this.flip(i));
+			}			
 		}
 		
 		return children;
@@ -88,6 +94,10 @@ public class Node implements Serializable  {
 		else{
 			return false;
 		}
+	}
+	
+	public int getPreviousFlip(){
+		return previousFlip;
 	}
 
 }

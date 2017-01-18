@@ -9,7 +9,7 @@ import mpi.Request;
 public class Parallel {
 
 	static boolean random = false;
-	static int mode = 1;
+	static int mode = 2;
 	static int numberOfPancakes = 17;
 	
 	static final int PROC_MAIN = 0;
@@ -81,7 +81,7 @@ public class Parallel {
 
 		}
 
-		Node root = new Node(list, 0);
+		Node root = new Node(list, 0, -1);
 		
 		System.out.println("Start:");
 		System.out.println(root.toString());
